@@ -17,7 +17,8 @@ import sugar_grain
 import bucket
 import level
 import message_display
-
+import sound
+import hud
 class Game:
     def __init__(self) -> None:
         pg.init()
@@ -26,10 +27,11 @@ class Game:
         self.iter = 0
         
         # Initialize font for HUD
-        self.font = pg.font.SysFont(None, 36)  # Default font, size 36
+        self.font = pg.font.SysFont(None, 20)  # Default font, size 36
+        self.grav_font = pg.font.SysFont(None, 36) # Font for the gravity indicator
 
         # Create a Pymunk space with gravity
-        self.current_level = 0
+        self.current_level = 2
         self.level_complete = False
         self.space = pymunk.Space()
         self.space.gravity = (0, -4.8)  # Gravity pointing downwards in Pymunk's coordinate system
@@ -148,6 +150,7 @@ class Game:
                     if not self.level_complete and self.check_all_buckets_exploded():
                         self.level_complete = True
                         self.message_display.show_message("Level Complete!", 2)
+                        sound.Sound.level_win()
                         pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Schedule next level load
                 else:
                     bucket.count_reset()
@@ -155,6 +158,7 @@ class Game:
             for grain in self.sugar_grains:
                 for bucket in self.buckets:
                     bucket.collect(grain)
+                    
                 
             # Drop sugar if needed
             if self.level_grain_dropping:
@@ -164,14 +168,6 @@ class Game:
                 # Check if it's time to stop
                 if len(self.sugar_grains) >= self.total_sugar_count:
                     self.level_grain_dropping = False
-
-    def draw_hud(self):
-        """Draw the HUD displaying the number of grains."""
-        # Prepare the text surface
-        if self.total_sugar_count:
-            text_surface = self.font.render(f'{self.total_sugar_count - len(self.sugar_grains)}', True, (255, 255, 255))
-            # Draw the text surface on the screen
-            self.screen.blit(text_surface, (10, 10))  # Position at top-left corner
 
     def draw(self):
         '''Draw the overall game. Should call individual item draw() methods'''
@@ -211,8 +207,18 @@ class Game:
                 5
             )
         
-        # Draw the heads-up display
-        self.draw_hud()
+        # Draw the heads-up display and gravity
+        HUD = hud.hud()
+        HUD.draw_hud(self.total_sugar_count, self.sugar_grains, self.font, self.buckets, self.screen, self.current_level)
+        
+        up_NEPA = u"\u2191"
+        down_NEPA = u"\u2193"
+        if self.space.gravity == (0, -4.8):
+            gravity_surface = self.grav_font.render("\u2193", None, (255,255,255))
+            self.screen.blit(gravity_surface, (WIDTH/2, HEIGHT/2))
+        else:
+            gravity_surface = self.grav_font.render("\u2191", None, (255,255,255))
+            self.screen.blit(gravity_surface, (WIDTH/2, HEIGHT/2))
 
         # Show any messages needed        
         self.message_display.draw(self.screen)
@@ -226,6 +232,10 @@ class Game:
             if event.type == EXIT_APP or event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 pg.quit()
                 sys.exit()
+            elif event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
+                self.space.gravity = (0, -4.8)
+            elif event.type == pg.KEYDOWN and event.key == pg.K_UP:
+                self.space.gravity = (0, 4.8)
             elif event.type == pg.MOUSEBUTTONDOWN:
                 self.mouse_down = True
                 # Get mouse position and start a new dynamic line

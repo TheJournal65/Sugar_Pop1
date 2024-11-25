@@ -10,6 +10,7 @@ import pygame as pg
 import pymunk
 from settings import SCALE, HEIGHT, WIDTH
 from math import sqrt
+import sound
 
 class Bucket:
     def __init__(self, space, x, y, width, height, needed_sugar):
@@ -96,7 +97,7 @@ class Bucket:
 
         # Remove the bucket walls
         self.space.remove(self.left_wall, self.right_wall, self.bottom_wall)
-
+        sound.Sound.vine_booom()
         self.exploded = True  # Mark the bucket as exploded
         
     def draw(self, screen):
@@ -120,7 +121,14 @@ class Bucket:
     def count_reset(self):
         if not self.exploded:
             self.count = 0
-        
+    
+    def get_pos(self):
+        # Helper function to convert Pymunk coordinates to Pygame coordinates
+        def to_pygame(p):
+            return int(p[0] * SCALE), int(HEIGHT - p[1] * SCALE)
+        pg_position = ((self.left_wall.a[0] + self.right_wall.a[0]) / 2), ((self.left_wall.a[1] + self.left_wall.b[1]) / 2)
+        return to_pygame(pg_position)
+          
     def collect(self, sugar_grain):
         """
         Check if a sugar grain is within the bucket bounds and, if so, increase the bucket's count.
@@ -141,6 +149,7 @@ class Bucket:
         # Check if the grain's position is within the bucket's bounding box
         if left <= grain_pos.x <= right and bottom <= grain_pos.y <= top:
             self.count += 1
+            sound.Sound.sugar_thang() # Need to move this elsewhere. Sound plays on loop
             return True  # Indicate that the grain was collected
 
         return False  # Grain not collected
