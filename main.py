@@ -28,7 +28,6 @@ class Game:
         
         # Initialize font for HUD
         self.font = pg.font.SysFont(None, 20)  # Default font, size 36
-        self.grav_font = pg.font.SysFont(None, 36) # Font for the gravity indicator
 
         # Create a Pymunk space with gravity
         self.current_level = 2
@@ -37,7 +36,8 @@ class Game:
         self.space.gravity = (0, -4.8)  # Gravity pointing downwards in Pymunk's coordinate system
         # Iterations defaults to 10. Higher is more accurate collison detection
         self.space.iterations = 30 
-
+        
+        self.is_paused = False
         self.drawing_lines = []
         self.sugar_grains = []
         self.buckets = []
@@ -56,6 +56,8 @@ class Game:
         self.intro_image = pg.transform.scale(self.intro_image, (WIDTH, int(scale_height)))  # Scale to screen resolution
         
         pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Load in 2 seconds
+        
+        self.win = sound.Sound() # Initialize a sound object in the main file
 
     def load_level(self, levelnumber=0):
         # Destroy any current game objects
@@ -118,6 +120,10 @@ class Game:
 
     def update(self):
         '''Update the program physics'''
+        
+        if self.is_paused: # Or dont!
+            return
+        
         # Keep an overall iterator
         self.iter += 1
         
@@ -150,7 +156,7 @@ class Game:
                     if not self.level_complete and self.check_all_buckets_exploded():
                         self.level_complete = True
                         self.message_display.show_message("Level Complete!", 2)
-                        sound.Sound.level_win()
+                        self.win.play('win')
                         pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Schedule next level load
                 else:
                     bucket.count_reset()
@@ -159,7 +165,6 @@ class Game:
                 for bucket in self.buckets:
                     bucket.collect(grain)
                     
-                
             # Drop sugar if needed
             if self.level_grain_dropping:
                 # Create new sugar to drop
@@ -168,6 +173,9 @@ class Game:
                 # Check if it's time to stop
                 if len(self.sugar_grains) >= self.total_sugar_count:
                     self.level_grain_dropping = False
+            
+            # Check for special static collision
+            
 
     def draw(self):
         '''Draw the overall game. Should call individual item draw() methods'''
@@ -209,16 +217,7 @@ class Game:
         
         # Draw the heads-up display and gravity
         HUD = hud.hud()
-        HUD.draw_hud(self.total_sugar_count, self.sugar_grains, self.font, self.buckets, self.screen, self.current_level)
-        
-        up_NEPA = u"\u2191"
-        down_NEPA = u"\u2193"
-        if self.space.gravity == (0, -4.8):
-            gravity_surface = self.grav_font.render("\u2193", None, (255,255,255))
-            self.screen.blit(gravity_surface, (WIDTH/2, HEIGHT/2))
-        else:
-            gravity_surface = self.grav_font.render("\u2191", None, (255,255,255))
-            self.screen.blit(gravity_surface, (WIDTH/2, HEIGHT/2))
+        HUD.draw_hud(self.total_sugar_count, self.sugar_grains, self.font, self.buckets, self.screen, self.current_level, self.space.gravity)
 
         # Show any messages needed        
         self.message_display.draw(self.screen)
@@ -232,6 +231,16 @@ class Game:
             if event.type == EXIT_APP or event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 pg.quit()
                 sys.exit()
+            
+            # Implementing a pause 
+            elif event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                self.is_paused = not self.is_paused
+                
+            # Implementing a restart
+            elif event.type == pg.KEYDOWN and event.key == pg.K_r:
+                self.current_level -= 1
+                pg.time.set_timer(LOAD_NEW_LEVEL, 100)
+                
             elif event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
                 self.space.gravity = (0, -4.8)
             elif event.type == pg.KEYDOWN and event.key == pg.K_UP:

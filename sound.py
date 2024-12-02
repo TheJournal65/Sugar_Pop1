@@ -6,18 +6,14 @@ from settings import *
 class Sound:
     def __init__(self) -> None:
         pg.mixer.init()
+        self.sound_list = []
+        for i in SOUNDS:
+            self.sound_list.append((i, pg.mixer.Sound(SOUNDS[i][0]), pg.mixer.Channel(SOUNDS[i][1])))
+            SOUND_LIST.extend(self.sound_list)
     
-    def vine_booom():
-        boom_boom = pg.mixer.Sound("audio\explosion-sound-effect-2-241820.mp3")
-        boom_boom.set_volume(.2)
-        pg.mixer.Sound.play(boom_boom)
-        
-    def sugar_thang():
-        sugar_drop = pg.mixer.Sound("audio\happy-pop-2-185287.mp3")
-        sugar_drop.set_volume(.01)
-        pg.mixer.Sound.play(sugar_drop)
-    
-    def level_win():
-        ya_hoo = pg.mixer.Sound("audio\level-win-6416.mp3")
-        ya_hoo.set_volume(.5)
-        pg.mixer.Sound.play(ya_hoo)
+    def play(name):
+        """Pass the name of the sound to play"""
+        for i in SOUND_LIST:
+            if name == i[0]:
+                i[2].play(i[1])
+                

@@ -10,15 +10,18 @@ import pymunk
 from settings import SCALE, HEIGHT
 
 class sugar_grain:
-    def __init__(self, space, x, y, friction=0.3):
+    def __init__(self, space, x, y, friction=0.3, color= (255, 255, 255)):
         """
         Initialize a sugar grain as a small dynamic body in Pymunk.
         
         :param space: The Pymunk space where the grain will be created.
         :param x: Initial x position in Pygame coordinates.
         :param y: Initial y position in Pygame coordinates.
+        :param color: Initial color; default to white
         """
         self.space = space
+        
+        self.color = color
 
         # Convert Pygame coordinates to Pymunk coordinates (Pymunk's Y-axis points upwards)
         pos_x = x / SCALE
@@ -41,6 +44,7 @@ class sugar_grain:
 
         # Add the body and shape to the space
         self.space.add(self.body, self.shape)
+        self.has_played = False
         
     def update(self):
         """
@@ -61,7 +65,7 @@ class sugar_grain:
         screen_y = HEIGHT - pos.y * SCALE
 
         # Draw a small square at this position
-        pg.draw.rect(screen, pg.Color('white'), (screen_x - 1, screen_y - 1, 2, 2))
+        pg.draw.rect(screen, self.color, (screen_x - 1, screen_y - 1, 2, 2))
 
     def delete(self):
         """

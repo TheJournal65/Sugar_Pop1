@@ -65,3 +65,4 @@ class StaticItem:
         if self.segment:
             self.space.remove(self.segment)  # Remove the segment from the Pymunk space
             self.segment = None  # Clear the reference to the segment
+            

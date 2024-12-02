@@ -61,6 +61,8 @@ class Bucket:
         space.add(self.bottom_wall)
         
         self.exploded = False  # Track if the bucket has exploded
+        
+        self.buck = sound.Sound() # Initialize a sound object in the bucket class
 
     def explode(self, grains):
         """
@@ -75,8 +77,9 @@ class Bucket:
         bucket_center_x = (self.left_wall.a[0] + self.right_wall.a[0]) / 2
         bucket_center_y = (self.left_wall.a[1] + self.left_wall.b[1]) / 2
 
-        # Apply radial force to each grain
+        # Apply radial force to each grain and reset has_played
         for grain in grains:
+            grain.has_played = False
             grain_pos = grain.body.position
 
             # Calculate the vector from the bucket center to the grain
@@ -97,7 +100,8 @@ class Bucket:
 
         # Remove the bucket walls
         self.space.remove(self.left_wall, self.right_wall, self.bottom_wall)
-        sound.Sound.vine_booom()
+        
+        sound.Sound.play('boom')
         self.exploded = True  # Mark the bucket as exploded
         
     def draw(self, screen):
@@ -148,8 +152,13 @@ class Bucket:
 
         # Check if the grain's position is within the bucket's bounding box
         if left <= grain_pos.x <= right and bottom <= grain_pos.y <= top:
+            
             self.count += 1
-            sound.Sound.sugar_thang() # Need to move this elsewhere. Sound plays on loop
+            
+            if sugar_grain.has_played == False:
+                sound.Sound.play('sugar') # Moved from collect function in bucket class. Yet to test
+                sugar_grain.has_played = True
+                # sugar_grain.body.mass = 0
             return True  # Indicate that the grain was collected
 
         return False  # Grain not collected
