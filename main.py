@@ -54,6 +54,7 @@ class Game:
         # Get new height based on correct scale
         scale_height = self.intro_image.get_height() * WIDTH / self.intro_image.get_width()
         self.intro_image = pg.transform.scale(self.intro_image, (WIDTH, int(scale_height)))  # Scale to screen resolution
+        self.win = sound.Sound()
         
         pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Load in 2 seconds
 

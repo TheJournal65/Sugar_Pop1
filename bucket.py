@@ -61,6 +61,8 @@ class Bucket:
         space.add(self.bottom_wall)
         
         self.exploded = False  # Track if the bucket has exploded
+        
+        self.buck = sound.Sound()
 
     def explode(self, grains):
         """
