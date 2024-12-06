@@ -30,7 +30,7 @@ class Game:
         self.font = pg.font.SysFont(None, 20)  # Default font, size 36
 
         # Create a Pymunk space with gravity
-        self.current_level = 2
+        self.current_level = 0
         self.level_complete = False
         self.space = pymunk.Space()
         self.space.gravity = (0, -4.8)  # Gravity pointing downwards in Pymunk's coordinate system
@@ -56,8 +56,6 @@ class Game:
         self.intro_image = pg.transform.scale(self.intro_image, (WIDTH, int(scale_height)))  # Scale to screen resolution
         
         pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Load in 2 seconds
-        
-        self.win = sound.Sound() # Initialize a sound object in the main file
 
     def load_level(self, levelnumber=0):
         # Destroy any current game objects
@@ -149,9 +147,11 @@ class Game:
             
             # Calculate buckets count by counting each grain's position
             # First, explode or reset the counter on each bucket
-            for bucket in self.buckets:
+            for i in range(len(self.buckets)-1, -1, -1):
+                bucket = self.buckets[i]
                 if bucket.count >= bucket.needed_sugar:
                     bucket.explode(self.sugar_grains)
+                    del self.buckets[i]
                     # If all the buckets are gone, level up!
                     if not self.level_complete and self.check_all_buckets_exploded():
                         self.level_complete = True
@@ -173,8 +173,6 @@ class Game:
                 # Check if it's time to stop
                 if len(self.sugar_grains) >= self.total_sugar_count:
                     self.level_grain_dropping = False
-            
-            # Check for special static collision
             
 
     def draw(self):

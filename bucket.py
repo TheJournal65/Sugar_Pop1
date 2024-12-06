@@ -61,8 +61,6 @@ class Bucket:
         space.add(self.bottom_wall)
         
         self.exploded = False  # Track if the bucket has exploded
-        
-        self.buck = sound.Sound() # Initialize a sound object in the bucket class
 
     def explode(self, grains):
         """
@@ -156,9 +154,8 @@ class Bucket:
             self.count += 1
             
             if sugar_grain.has_played == False:
-                sound.Sound.play('sugar') # Moved from collect function in bucket class. Yet to test
+                sound.Sound.play('sugar')
                 sugar_grain.has_played = True
-                # sugar_grain.body.mass = 0
             return True  # Indicate that the grain was collected
 
         return False  # Grain not collected
