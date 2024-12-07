@@ -1,3 +1,12 @@
+#############################################################
+# Module Name: Sugar Pop Sound Module
+# Project: Sugar Pop Program
+# Date: December 1, 2024
+# By: Enyinnaya Ukairo
+# Description: The sound implementation for sugar pop
+#############################################################
+
+
 import pygame as pg
 import pymunk  # Import Pymunk library
 import sys
